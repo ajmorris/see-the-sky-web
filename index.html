@@ -479,10 +479,8 @@
 </footer>
 
 <script>
-  // Lead capture.
-  // To connect to Kit: replace KIT_FORM_ACTION with your Kit form's action URL
-  // (Kit → Grow → Landing Pages & Forms → your form → Embed → HTML; copy the <form action="..."> value).
-  // Field name "email_address" already matches Kit's expected field.
+  // Lead capture via Kit form subscriptions endpoint.
+  // Field name "email_address" matches Kit's HTML embed.
   const KIT_FORM_ACTION = "https://app.kit.com/forms/9968674/subscriptions";
 
   document.querySelectorAll("[data-signup]").forEach(form => {
@@ -491,16 +489,31 @@
       const email = form.querySelector('input[type="email"]').value.trim();
       const wrap = form.closest(".signup-wrap");
       const btn = form.querySelector("button");
+      const original = btn.textContent;
       btn.disabled = true; btn.textContent = "Adding you…";
       try {
-        if (KIT_FORM_ACTION) {
-          const body = new URLSearchParams({ email_address: email });
-          await fetch(KIT_FORM_ACTION, { method: "POST", body, mode: "no-cors", headers: { "Accept": "application/json" } });
+        const body = new URLSearchParams({ email_address: email });
+        const res = await fetch(KIT_FORM_ACTION, {
+          method: "POST",
+          body,
+          headers: { Accept: "application/json" },
+        });
+        const data = await res.json().catch(() => ({}));
+
+        // Kit spam protection: complete reCAPTCHA on their guard page, then return.
+        if (data.status === "quarantined" && data.url) {
+          window.location.href = data.url;
+          return;
         }
+
+        if (!res.ok || (data.status && data.status !== "success")) {
+          throw new Error(data.status || "subscribe_failed");
+        }
+
         try { localStorage.setItem("outside-subscribed", "1"); } catch (_) {}
         wrap.classList.add("is-done");
       } catch (err) {
-        btn.disabled = false; btn.textContent = "Try again";
+        btn.disabled = false; btn.textContent = original;
       }
     });
   });
