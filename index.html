@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>See the Sky — The world is too good to miss</title>
+<meta name="description" content="See the Sky automatically tracks how much time you spend outdoors on iPhone and Apple Watch. Set a daily goal or a 1000-hour year. Never press a timer again. Get on the list.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --sun: #F7B733;
+    --sunrise: #EA7A2C;
+    --sky: #BFE3F5;
+    --sky-deep: #6FB4DE;
+    --lake: #1F6A93;
+    --pine: #2E5A3C;
+    --pine-dark: #1F3F2A;
+    --sand: #FFF7E6;
+    --sand-2: #FBECCB;
+    --ink: #1D2B36;
+    --ink-soft: #4A5A66;
+    --line: rgba(29,43,54,.12);
+    --card: #FFFFFF;
+    --bg: var(--sand);
+    --hero-sky-top: #FFE9B3;
+    --hero-sky-bottom: #BFE3F5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17212B;
+      --sand: #17212B;
+      --sand-2: #1F2C38;
+      --card: #223140;
+      --ink: #F3EEE2;
+      --ink-soft: #B9C2CA;
+      --line: rgba(243,238,226,.14);
+      --sky: #2B4A63;
+      --hero-sky-top: #2A3A4E;
+      --hero-sky-bottom: #1F4A66;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17212B; --sand: #17212B; --sand-2: #1F2C38; --card: #223140;
+    --ink: #F3EEE2; --ink-soft: #B9C2CA; --line: rgba(243,238,226,.14);
+    --sky: #2B4A63; --hero-sky-top: #2A3A4E; --hero-sky-bottom: #1F4A66;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .sun-glow { animation: none !important; } }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: "Bricolage Grotesque", "Arial Black", Impact, sans-serif;
+    font-variation-settings: "opsz" 96;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0 0 .5em;
+    font-weight: 800;
+  }
+  h1 { font-size: clamp(2.6rem, 6.2vw, 4.75rem); }
+  h2 { font-size: clamp(1.9rem, 3.8vw, 2.9rem); }
+  h3 { font-size: 1.35rem; font-weight: 700; }
+  p { margin: 0 0 1em; max-width: 62ch; }
+  a { color: var(--lake); }
+  .wrap { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+  .lede { font-size: 1.25rem; color: var(--ink-soft); }
+
+  /* Header */
+  header {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.35rem; }
+  .brand svg { width: 30px; height: 30px; }
+  .nav a.btn { padding: .55rem 1rem; font-size: .95rem; }
+
+  /* Buttons + form */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    background: var(--sunrise); color: #fff; text-decoration: none;
+    border: 0; border-radius: 999px; padding: .95rem 1.5rem;
+    font: 600 1.05rem "Instrument Sans", sans-serif; cursor: pointer;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--sunrise) 65%, #000);
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .btn:hover { transform: translateY(1px); box-shadow: 0 5px 0 color-mix(in srgb, var(--sunrise) 65%, #000); }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--sunrise) 65%, #000); }
+  .btn:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--sky-deep); outline-offset: 3px; }
+  .signup { display: flex; flex-wrap: wrap; gap: .6rem; max-width: 560px; }
+  .signup input {
+    flex: 1 1 260px; min-width: 0;
+    font: 500 1.05rem "Instrument Sans", sans-serif;
+    padding: .95rem 1.2rem; border-radius: 999px;
+    border: 2px solid var(--line); background: var(--card); color: var(--ink);
+  }
+  .signup input::placeholder { color: var(--ink-soft); }
+  .fineprint { font-size: .9rem; color: var(--ink-soft); margin-top: .75rem; }
+  .signup-done { display: none; padding: 1rem 1.25rem; border-radius: 16px; background: color-mix(in srgb, var(--sun) 28%, var(--card)); border: 2px solid var(--sun); font-weight: 600; max-width: 560px; }
+  .signup-wrap.is-done .signup, .signup-wrap.is-done .fineprint { display: none; }
+  .signup-wrap.is-done .signup-done { display: block; }
+
+  /* Hero */
+  .hero {
+    position: relative; overflow: hidden;
+    background: linear-gradient(180deg, var(--hero-sky-top) 0%, var(--hero-sky-bottom) 100%);
+    padding: clamp(3rem, 7vw, 6rem) 0 0;
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 3rem; align-items: end; }
+  .hero-copy { padding-bottom: clamp(3rem, 8vw, 7rem); }
+  .tagline { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 1.05rem; color: var(--lake); margin-bottom: 1rem; }
+  .hero h1 { max-width: 14ch; }
+  .hero .lede { max-width: 48ch; margin-bottom: 1.75rem; }
+  .hero-art { position: relative; align-self: stretch; }
+  .hero-art svg { width: 100%; height: auto; display: block; }
+  .sun-glow { transform-origin: center; animation: breathe 6s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { opacity: .55; transform: scale(1); } 50% { opacity: .85; transform: scale(1.06); } }
+  .landscape { display: block; width: 100%; height: auto; margin-bottom: -2px; }
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .hero-copy { padding-bottom: 1.5rem; }
+    .hero-art { max-width: 420px; }
+  }
+
+  /* Sections */
+  section { padding: clamp(3.5rem, 8vw, 6.5rem) 0; }
+  .band { background: var(--sand-2); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; gap: 2rem; } }
+
+  .math { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.5; border-left: 5px solid var(--sun); padding-left: 1.25rem; margin: 1.5rem 0; }
+  .math span { color: var(--sunrise); }
+
+  .steps { counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 2.5rem; }
+  .step { counter-increment: step; position: relative; padding-top: 3.25rem; }
+  .step::before {
+    content: counter(step); position: absolute; top: 0; left: 0;
+    width: 2.5rem; height: 2.5rem; border-radius: 50%; display: grid; place-items: center;
+    background: var(--sun); color: var(--ink); font: 800 1.15rem "Bricolage Grotesque", sans-serif;
+  }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr; gap: 1.75rem; } }
+
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+  .feature { background: var(--card); border-radius: 20px; padding: 1.5rem 1.5rem 1.25rem; border-top: 6px solid var(--feat, var(--sun)); }
+  .feature h3 { margin-bottom: .4rem; }
+  .feature p { margin: 0; color: var(--ink-soft); font-size: 1rem; }
+
+  .widget { display: flex; justify-content: center; }
+  .widget svg { width: min(100%, 380px); height: auto; filter: drop-shadow(0 18px 30px rgba(29,43,54,.18)); }
+
+  .quote { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.3; max-width: 24ch; }
+  .fits { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+  .fits ul { list-style: none; padding: 0; margin: 0; }
+  .fits li { padding: .45rem 0 .45rem 2rem; position: relative; }
+  .fits li::before { position: absolute; left: 0; top: .45rem; font-weight: 700; }
+  .fits .yes li::before { content: "✓"; color: var(--pine); }
+  .fits .no li::before { content: "—"; color: var(--sunrise); }
+  @media (max-width: 700px) { .fits { grid-template-columns: 1fr; } }
+
+  .faq { max-width: 760px; }
+  details { border-bottom: 1px solid var(--line); padding: .25rem 0; }
+  summary { cursor: pointer; list-style: none; padding: 1rem 2.5rem 1rem 0; font: 700 1.15rem "Bricolage Grotesque", sans-serif; position: relative; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; position: absolute; right: .25rem; top: .85rem; font-size: 1.6rem; color: var(--sunrise); line-height: 1; transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { color: var(--ink-soft); padding-bottom: 1rem; }
+
+  .final { background: linear-gradient(180deg, var(--hero-sky-bottom), var(--hero-sky-top)); position: relative; overflow: hidden; }
+  .final .wrap { position: relative; z-index: 1; }
+  .final h2 { max-width: 16ch; }
+
+  footer { padding: 2rem 0 3rem; font-size: .9rem; color: var(--ink-soft); }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="See the Sky home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="13" r="7" fill="#F7B733"/><path d="M2 30 L11 17 L16 24 L21 15 L30 30 Z" fill="#2E5A3C"/><path d="M0 32 H32 V29 Q16 26 0 29 Z" fill="#1F6A93"/></svg>
+      See the Sky
+    </a>
+    <a class="btn" href="#list">Get on the list</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ===== HERO ===== -->
+<section class="hero" style="padding-bottom:0">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="tagline">The world is too good to miss.</div>
+      <h1>Know how much of your life you actually spend outside.</h1>
+      <p class="lede">See the Sky tracks your outdoor time automatically with your iPhone and Apple Watch, then shows it against the goal you care about. A daily habit. A 1000-hour year. Your call. No timer to remember.</p>
+      <div class="signup-wrap">
+        <form class="signup" data-signup>
+          <label for="email-hero" class="visually-hidden" style="position:absolute;left:-9999px">Email address</label>
+          <input id="email-hero" type="email" name="email_address" placeholder="you@example.com" required autocomplete="email">
+          <button class="btn" type="submit">Get on the list</button>
+        </form>
+        <p class="fineprint">Launching on iPhone and Apple Watch. One email when it's ready, a few honest updates along the way, zero spam.</p>
+        <div class="signup-done" role="status">You're on the list. Now go outside — we'll handle the counting.</div>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 520 440" xmlns="http://www.w3.org/2000/svg">
+        <circle class="sun-glow" cx="360" cy="140" r="120" fill="#F7B733" opacity=".55"/>
+        <circle cx="360" cy="140" r="64" fill="#F7B733"/>
+        <circle cx="360" cy="140" r="52" fill="#FFD466"/>
+        <!-- far ridge -->
+        <path d="M0 300 L70 210 L120 260 L180 170 L250 250 L300 200 L360 280 L420 190 L520 290 L520 440 L0 440 Z" fill="#6FB4DE"/>
+        <!-- snow caps -->
+        <path d="M180 170 L165 195 L180 192 L193 200 L200 190 Z" fill="#fff" opacity=".9"/>
+        <path d="M420 190 L406 212 L420 208 L432 216 L440 206 Z" fill="#fff" opacity=".9"/>
+        <!-- mid ridge -->
+        <path d="M0 340 L60 280 L110 320 L170 250 L230 320 L290 270 L350 330 L410 280 L470 330 L520 300 L520 440 L0 440 Z" fill="#1F6A93"/>
+        <!-- pines -->
+        <g fill="#2E5A3C">
+          <path d="M40 360 L60 310 L80 360 Z M45 340 L60 300 L75 340 Z M50 325 L60 295 L70 325 Z"/>
+          <path d="M95 372 L118 312 L141 372 Z M100 350 L118 300 L136 350 Z M105 333 L118 292 L131 333 Z"/>
+          <path d="M440 366 L462 306 L484 366 Z M445 344 L462 294 L479 344 Z M450 327 L462 286 L474 327 Z"/>
+          <path d="M490 372 L506 330 L520 372 Z M494 352 L506 320 L518 352 Z"/>
+        </g>
+        <g fill="#1F3F2A">
+          <path d="M150 380 L170 332 L190 380 Z M155 362 L170 322 L185 362 Z"/>
+          <path d="M400 380 L420 332 L440 380 Z M405 362 L420 322 L435 362 Z"/>
+        </g>
+        <!-- lake -->
+        <path d="M0 380 Q260 350 520 380 L520 440 L0 440 Z" fill="#6FB4DE"/>
+        <path d="M0 380 Q260 350 520 380 L520 400 Q260 372 0 400 Z" fill="#8FC9EA" opacity=".8"/>
+        <!-- sun reflection -->
+        <g fill="#FFD466" opacity=".7">
+          <rect x="330" y="386" width="60" height="4" rx="2"/><rect x="340" y="396" width="42" height="4" rx="2"/><rect x="348" y="406" width="26" height="4" rx="2"/>
+        </g>
+        <!-- kayak -->
+        <path d="M200 402 Q240 392 280 402 Q240 412 200 402 Z" fill="#EA7A2C"/>
+        <circle cx="240" cy="392" r="7" fill="#1D2B36"/>
+        <path d="M222 388 L262 396" stroke="#1D2B36" stroke-width="3" stroke-linecap="round"/>
+        <!-- dune / beach -->
+        <path d="M0 440 L0 418 Q120 400 240 420 Q380 440 520 426 L520 440 Z" fill="#F7E1B0"/>
+      </svg>
+    </div>
+  </div>
+  <svg class="landscape" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60 Q360 20 720 55 T1440 45 L1440 90 L0 90 Z" fill="var(--bg)"/></svg>
+</section>
+
+<!-- ===== PROBLEM ===== -->
+<section>
+  <div class="wrap two">
+    <div>
+      <h2>You meant to get outside today.</h2>
+      <p class="lede">Then the meeting ran long. The kids needed a ride. It got dark at 5:30. And the day was gone.</p>
+      <p>It's not a willpower problem. It's a visibility problem. You can see your steps, your sleep, your screen time down to the minute. But the one number that changes your mood, your sleep, and your kids' entire childhood? Nobody's counting it.</p>
+      <p>Well, almost nobody. The 1000 Hours Outside crowd counts it by hand, on paper trackers and buggy timer apps, tapping start and stop and forgetting half the time.</p>
+      <p>There's an easier way.</p>
+    </div>
+    <div>
+      <div class="math">
+        A walk to the car you forgot to log<br>
+        + 40 minutes at the park you started late<br>
+        + the whole soccer practice nobody timed<br>
+        + the hike where your phone died<br>
+        = <span>hours you actually lived outside</span> that never made it onto the tracker.
+      </div>
+      <p>Your watch already knows. See the Sky just does the math.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="band">
+  <div class="wrap">
+    <h2>Never press a timer again.</h2>
+    <p class="lede">Your Apple Watch already senses daylight, motion, and where you go. See the Sky puts those signals together, a few times a day, and figures out when you were really out there.</p>
+    <div class="steps">
+      <div class="step">
+        <h3>Walk out the door</h3>
+        <p>That's the whole instruction. Your watch's daylight sensor, your movement, and your familiar places do the rest. No button. Nothing to remember.</p>
+      </div>
+      <div class="step">
+        <h3>See the Sky adds it up</h3>
+        <p>Several times a day, the app looks back at what your watch collected and turns it into outdoor sessions. Sitting by a sunny window at your desk doesn't count. Twenty minutes on the trail does.</p>
+      </div>
+      <div class="step">
+        <h3>See it on your home screen</h3>
+        <p>A widget shows where you stand against your goal: 5 h 12 m of 7 today, or 412 of 1000 hours this year. Glance, then get back outside.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WIDGET + GOALS ===== -->
+<section>
+  <div class="wrap two">
+    <div class="widget" aria-hidden="true">
+      <svg viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
+        <rect width="380" height="380" rx="56" fill="url(#g)"/>
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E8ABD"/><stop offset="1" stop-color="#1B4E6E"/></linearGradient>
+        </defs>
+        <!-- ring -->
+        <circle cx="104" cy="126" r="62" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="16"/>
+        <circle cx="104" cy="126" r="62" fill="none" stroke="#F7B733" stroke-width="16" stroke-linecap="round" stroke-dasharray="390" stroke-dashoffset="100" transform="rotate(-90 104 126)"/>
+        <circle cx="104" cy="126" r="38" fill="#F7B733"/>
+        <path d="M76 142 L92 118 L100 130 L110 114 L134 142 Z" fill="#2E5A3C"/>
+        <!-- today -->
+        <text x="196" y="118" fill="#fff" font-family="Bricolage Grotesque, Arial, sans-serif" font-weight="800" font-size="46" letter-spacing="-1">5h 12m</text>
+        <text x="197" y="148" fill="rgba(255,255,255,.78)" font-family="Instrument Sans, Arial, sans-serif" font-weight="500" font-size="19">of 7 h today</text>
+        <text x="197" y="178" fill="#F7B733" font-family="Instrument Sans, Arial, sans-serif" font-weight="600" font-size="16">On pace, 2 h 48 m to go</text>
+        <!-- year -->
+        <text x="42" y="262" fill="rgba(255,255,255,.78)" font-family="Instrument Sans, Arial, sans-serif" font-weight="500" font-size="17">This year</text>
+        <text x="338" y="262" text-anchor="end" fill="rgba(255,255,255,.55)" font-family="Instrument Sans, Arial, sans-serif" font-size="14">as of 2:15 PM</text>
+        <text x="42" y="304" fill="#fff" font-family="Bricolage Grotesque, Arial, sans-serif" font-weight="800" font-size="34" letter-spacing="-0.5">412 / 1000 h</text>
+        <rect x="42" y="322" width="296" height="10" rx="5" fill="rgba(255,255,255,.18)"/>
+        <rect x="42" y="322" width="122" height="10" rx="5" fill="#F7B733"/>
+      </svg>
+    </div>
+    <div>
+      <h2>Pick a goal. Any size.</h2>
+      <p class="lede">Some people want an hour a day. Some families want a thousand hours a year. See the Sky handles both, at the same time if you like.</p>
+      <p><strong>Daily, weekly, monthly.</strong> Set the number, watch it fill. A weekly goal means one rainy Tuesday doesn't wreck your streak.</p>
+      <p><strong>The 1000-hour year.</strong> Pick a target and a start date, and See the Sky tells you if you're ahead or behind pace, and exactly how many minutes a day it takes to stay on track. Presets for 1000 hours and a "first 100."</p>
+      <p><strong>On your home screen, lock screen, and wrist.</strong> Widgets for every size, plus an Apple Watch complication. The number carries an "as of" time so you always know how fresh it is.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAMILY ===== -->
+<section class="band">
+  <div class="wrap two">
+    <div>
+      <h2>Built for families who count hours together.</h2>
+      <p class="lede">Kids don't wear watches. That shouldn't mean their hours go untracked.</p>
+      <p>Create a profile for each family member. When See the Sky detects you were at the park for 90 minutes, one tap says who was with you, and everyone's total moves. Two parents on two phones? Both feed the same family ledger, with no double counting.</p>
+      <p>Each kid gets their own goal, their own widget, their own year-at-a-glance. Milestone badges at 100, 250, 500, 750, and 1000 hours, because the coloring-sheet tracker on the fridge deserves a digital sibling.</p>
+    </div>
+    <div>
+      <p class="quote">"We spent 1,014 hours outside last year. I know because I stopped guessing."</p>
+      <p class="fineprint">What we're building toward. Not a real testimonial yet, but it will be.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section>
+  <div class="wrap">
+    <h2>What's in the app</h2>
+    <p class="lede">Everything that matters. Nothing that nags.</p>
+    <div class="features">
+      <div class="feature" style="--feat: var(--sun)"><h3>Automatic detection</h3><p>Daylight, motion, workouts, and the places you frequent, combined into outdoor sessions. No timer.</p></div>
+      <div class="feature" style="--feat: var(--sunrise)"><h3>Smart about windows</h3><p>See the Sky learns your home, office, and school so a bright desk doesn't count as a hike.</p></div>
+      <div class="feature" style="--feat: var(--lake)"><h3>One-tap corrections</h3><p>Swipe any session to say "that was inside" or "yep, outside." Every correction makes it smarter.</p></div>
+      <div class="feature" style="--feat: var(--pine)"><h3>Goals with pace</h3><p>Daily, weekly, monthly, or cumulative. Always know if you're ahead or behind, and by how much.</p></div>
+      <div class="feature" style="--feat: var(--sky-deep)"><h3>Widgets everywhere</h3><p>Home screen, lock screen, StandBy, and Apple Watch complications. One per kid if you want.</p></div>
+      <div class="feature" style="--feat: var(--sun)"><h3>Family profiles</h3><p>Track everyone from one watch. Sync between parents with iCloud. No accounts, no logins.</p></div>
+      <div class="feature" style="--feat: var(--sunrise)"><h3>Calm notifications</h3><p>All off by default. Turn on a midday nudge, an evening summary, or a weekly pace check. Your choice.</p></div>
+      <div class="feature" style="--feat: var(--lake)"><h3>Your data, yours</h3><p>Everything is computed on your device. Sessions write back to Apple Health. Export to CSV anytime.</p></div>
+      <div class="feature" style="--feat: var(--pine)"><h3>Works without a watch</h3><p>No Apple Watch? Log time manually or use the built-in timer. Add one later and it takes over.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FIT ===== -->
+<section class="band">
+  <div class="wrap">
+    <h2>Is See the Sky for you?</h2>
+    <div class="fits">
+      <div>
+        <h3>You'll love it if</h3>
+        <ul class="yes">
+          <li>You're doing 1000 Hours Outside and you're tired of the paper tracker (or the timer app that forgets)</li>
+          <li>You feel better after time outside and want to know when you're slipping</li>
+          <li>You hike, run, paddle, ski, surf, or just walk the dog, and you'd like it all to count</li>
+          <li>You live somewhere with real winters and want to see what the dark months do to you</li>
+          <li>You want a number on your home screen, not another app to open</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Probably not for you if</h3>
+        <ul class="no">
+          <li>You want a stopwatch that ticks in real time (See the Sky updates a few times a day, on purpose)</li>
+          <li>You're on Android (not yet)</li>
+          <li>You want UV index, burn time, or Vitamin D estimates. Great apps exist for that; this isn't one</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section>
+  <div class="wrap">
+    <h2>Questions people ask</h2>
+    <div class="faq">
+      <details>
+        <summary>How does it know I'm outside without a timer?</summary>
+        <p>Your Apple Watch has an ambient light sensor and already records "Time in Daylight" to Apple Health. See the Sky reads that, then cross-checks it with your movement, your workouts, and the places you go every day. A few times a day it looks back and turns those signals into outdoor sessions.</p>
+      </details>
+      <details>
+        <summary>Which Apple Watch do I need?</summary>
+        <p>Apple Watch Series 6 or later, Apple Watch SE (2nd generation) or later, or any Apple Watch Ultra, running watchOS 10 or newer. That's every model from the last several years. Your iPhone needs iOS 17 or later.</p>
+      </details>
+      <details>
+        <summary>Does it count sitting by a window?</summary>
+        <p>The daylight sensor alone would. See the Sky won't. It learns your home, office, and other regular indoor spots, and it treats daylight there with suspicion unless your movement says you actually went out. And if it gets one wrong, one swipe fixes it and teaches it.</p>
+      </details>
+      <details>
+        <summary>Is it real time?</summary>
+        <p>No, and that's deliberate. See the Sky is a daily metric, like a step count, not a stopwatch. Your total updates a few times a day and the widget shows an "as of" time. That's what lets it run all day with almost no battery cost.</p>
+      </details>
+      <details>
+        <summary>What about the battery?</summary>
+        <p>See the Sky never runs GPS continuously. It uses data your watch is already collecting, so the target is under three percent extra battery a day on both watch and phone.</p>
+      </details>
+      <details>
+        <summary>My kids don't have watches. How do their hours work?</summary>
+        <p>Create a profile for each of them. When See the Sky detects a session on your watch, tap the faces of whoever was with you. You can also set a default ("the kids are usually with me") so it's pre-filled. Manual entry is there for the days grandma takes them to the beach.</p>
+      </details>
+      <details>
+        <summary>Do I need an account?</summary>
+        <p>No. Solo use needs nothing. Family sync between two parents uses iCloud, so it's your existing Apple ID and nothing else. There's no login, no password, no server of ours holding your data.</p>
+      </details>
+      <details>
+        <summary>Where does my location data go?</summary>
+        <p>Nowhere. The places See the Sky learns stay on your device and are never synced, even to your other devices. Family sync shares session times and profile names only.</p>
+      </details>
+      <details>
+        <summary>When does it launch?</summary>
+        <p>We're building it now. The first TestFlight goes to people on this list. Get on it and you'll hear first.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="final" id="list">
+  <div class="wrap">
+    <h2>Get on the list. Then go outside.</h2>
+    <p class="lede">Be first to try See the Sky on TestFlight, get the launch price, and hear the honest story of building it, including the parts that don't work yet.</p>
+    <div class="signup-wrap">
+      <form class="signup" data-signup>
+        <label for="email-final" style="position:absolute;left:-9999px">Email address</label>
+        <input id="email-final" type="email" name="email_address" placeholder="you@example.com" required autocomplete="email">
+        <button class="btn" type="submit">Put me on the list</button>
+      </form>
+      <p class="fineprint">No spam. Unsubscribe with one tap. The world is too good to miss, and so is this.</p>
+      <div class="signup-done" role="status">You're on the list. Now go outside — we'll handle the counting.</div>
+    </div>
+  </div>
+  <svg viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;bottom:0;left:0;width:100%;height:160px;opacity:.9">
+    <path d="M0 120 L120 70 L220 110 L340 40 L460 100 L560 60 L700 120 L820 50 L940 100 L1060 30 L1180 90 L1300 60 L1440 110 L1440 160 L0 160 Z" fill="#2E5A3C" opacity=".35"/>
+    <path d="M0 160 L0 140 Q720 100 1440 140 L1440 160 Z" fill="#1F6A93" opacity=".5"/>
+  </svg>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 See the Sky. Made in Michigan, between the lakes.</div>
+    <div>See the Sky is not a medical device. It counts time, not sunscreen.</div>
+  </div>
+</footer>
+
+<script>
+  // Lead capture.
+  // To connect to Kit: replace KIT_FORM_ACTION with your Kit form's action URL
+  // (Kit → Grow → Landing Pages & Forms → your form → Embed → HTML; copy the <form action="..."> value).
+  // Field name "email_address" already matches Kit's expected field.
+  const KIT_FORM_ACTION = "https://app.kit.com/forms/9968674/subscriptions";
+
+  document.querySelectorAll("[data-signup]").forEach(form => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = form.querySelector('input[type="email"]').value.trim();
+      const wrap = form.closest(".signup-wrap");
+      const btn = form.querySelector("button");
+      btn.disabled = true; btn.textContent = "Adding you…";
+      try {
+        if (KIT_FORM_ACTION) {
+          const body = new URLSearchParams({ email_address: email });
+          await fetch(KIT_FORM_ACTION, { method: "POST", body, mode: "no-cors", headers: { "Accept": "application/json" } });
+        }
+        try { localStorage.setItem("outside-subscribed", "1"); } catch (_) {}
+        wrap.classList.add("is-done");
+      } catch (err) {
+        btn.disabled = false; btn.textContent = "Try again";
+      }
+    });
+  });
+</script>
+</body>
+</html>
